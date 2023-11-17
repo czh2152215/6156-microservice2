@@ -4,7 +4,7 @@ from db_connection import base
 
 
 class Adopter(base):
-    __tablename__ = "Adopter"
+    __tablename__ = "adopters"
 
     id = Column(Integer, primary_key=True, autoincrement=True)
     name = Column(String)

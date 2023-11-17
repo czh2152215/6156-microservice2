@@ -10,6 +10,11 @@ from fastapi import HTTPException
 
 app = FastAPI()
 session = SessionLocal()
+class AdopterIn(BaseModel):
+    name: str
+    age: int
+    email: str
+    phone: str
 class AdopterOut(BaseModel):
     id:int
     name:str
@@ -19,7 +24,10 @@ class AdopterOut(BaseModel):
 @app.get("/")
 def read_root():
     return {"Hello": "World"}
-
+@app.get("/adopters")
+def get_all_adopters():
+    adopter_query = session.query(Adopter)
+    return adopter_query.all()
 @app.get("/adopter/{adopter_id}", response_model=AdopterOut)
 def get_adopter(adopter_id: int):
     try:
@@ -31,5 +39,29 @@ def get_adopter(adopter_id: int):
         print(e)
         raise HTTPException(status_code=500, detail="Internal Server Error")
 
-if __name__ == "__main__":
-    uvicorn.run(app, host="0.0.0.0", port=8011)
+@app.post("/adopter/create")
+def create_pet():
+    adopter = Adopter(
+        name = "jason",
+        age = 11,
+        email = "czh2162216@gmail.com",
+        phone = "001-1101010"
+    )
+    session.add(adopter)
+    session.commit()
+    return {"Adopter added": adopter.id}
+
+@app.put("/adopter/{adopter_id}/update")
+def update_to_white(adopter_id: int):
+    update_querry = session.query(Adopter).filter(Adopter.id == adopter_id)
+    adopter = update_querry.first()
+    adopter.name = "white"
+    session.add(adopter)
+    session.commit()
+
+@app.delete("/adopter/{adopter_id}/delete")
+def delete_todo(adopter_id: int):
+    adopter = session.query(Adopter).filter(Adopter.id==adopter_id).first()
+    session.delete(adopter)
+    session.commit()
+    return {"todo deleted": adopter.id}
